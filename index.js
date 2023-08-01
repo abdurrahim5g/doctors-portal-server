@@ -37,9 +37,32 @@ const run = async () => {
 
     // get app the appointmentOptions
     app.get("/appointmentOptions", async (req, res) => {
+      const date = req.query.date;
+      // console.log(date);
       const query = {};
-      const result = await appointmentCollections.find(query).toArray();
-      res.send(result);
+      const appointmentOptions = await appointmentCollections
+        .find(query)
+        .toArray();
+
+      const bookingQuery = { appointmentData: date };
+      const alreadyBooked = await bookingsCollection
+        .find(bookingQuery)
+        .toArray();
+
+      // Let's get only available slot
+      appointmentOptions.forEach((option) => {
+        const bookedOption = alreadyBooked.filter(
+          (book) => book.tritmentName === option.name
+        );
+        const bookedSlots = bookedOption.map((book) => book.slot);
+        const remainingSlots = option.slots.filter(
+          (slot) => !bookedSlots.includes(slot)
+        );
+
+        option.slots = remainingSlots;
+      });
+
+      res.send(appointmentOptions);
     });
 
     /**
