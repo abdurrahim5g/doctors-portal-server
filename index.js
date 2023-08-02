@@ -65,6 +65,55 @@ const run = async () => {
       res.send(appointmentOptions);
     });
 
+    // Use MongoDB Aggrigate
+    app.get("/v2/appointmentOptions", async (req, res) => {
+      const date = req.query.date;
+      const options = await appointmentCollections
+        .aggregate([
+          {
+            $lookup: {
+              from: "bookings", // this name should be MongoDB collection name
+              localField: "name",
+              foreignField: "tritmentName",
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $eq: ["$appointmentData", date],
+                    },
+                  },
+                },
+              ],
+              as: "booked",
+            },
+          },
+          {
+            $project: {
+              name: 1,
+              slots: 1,
+              booked: {
+                $map: {
+                  input: "$booked",
+                  as: "book",
+                  in: "$$book.slot",
+                },
+              },
+            },
+          },
+          {
+            $project: {
+              name: 1,
+              slots: {
+                $setDifference: ["$slots", "$booked"],
+              },
+            },
+          },
+        ])
+        .toArray();
+
+      res.send(options);
+    });
+
     /**
      * API naming convension
      * get("/bookings")       => all bookings
@@ -76,7 +125,6 @@ const run = async () => {
     // Post a booking
     app.post("/bookings", async (req, res) => {
       const bookingInfo = req.body;
-      // console.log(bookingInfo);
       const result = await bookingsCollection.insertOne(bookingInfo);
       res.send(result);
     });
