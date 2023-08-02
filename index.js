@@ -122,7 +122,15 @@ const run = async () => {
      * patch("/bookings/:id") => Update single booking
      * delete("/bookings/:id")=> Delete single booking
      */
-    // Post a booking
+
+    // GET request for bookings
+    app.get("/bookings", async (req, res) => {
+      const query = req.query;
+      const myBookings = await bookingsCollection.find(query).toArray();
+      res.send(myBookings);
+    });
+
+    // Post request for bookings
     app.post("/bookings", async (req, res) => {
       const bookingInfo = req.body;
 
