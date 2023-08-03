@@ -28,12 +28,20 @@ app.get("/", (req, res) => {
 
 const run = async () => {
   try {
+    /**
+     * All collection in here
+     * ==========================
+     * => appointmentCollection
+     * => bookingsCollection
+     * => usersCollection
+     */
     const appointmentCollections = client
       .db("doctorsAppointment")
       .collection("appointmentCollections");
     const bookingsCollection = client
       .db("doctorsAppointment")
       .collection("bookings");
+    const usersCollection = client.db("doctorsAppointment").collection("users");
 
     // get app the appointmentOptions
     app.get("/appointmentOptions", async (req, res) => {
@@ -154,6 +162,26 @@ const run = async () => {
       const result = await bookingsCollection.insertOne(bookingInfo);
       res.send(result);
     });
+
+    /**
+     *
+     * API naming convention for users
+     * ===============================
+     * app.get("/users")          => get all users
+     * app.get("/users?email")    => get single user with email
+     * app.post("/users")         => Added a user to the database
+     * ===========================================================
+     */
+
+    app.post("/users", async (req, res) => {
+      const userInfo = req.body;
+      const result = await usersCollection.insertOne(userInfo);
+      res.send(result);
+    });
+
+    /**
+     * Try end here
+     * ===================== */
   } finally {
     // Finally
   }
