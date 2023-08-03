@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 5000;
+const jwt = require("jsonwebtoken");
 const cors = require("cors");
 require("dotenv").config();
 
@@ -25,6 +26,29 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.send("Doctors server is running");
 });
+
+/**
+ *
+ * Verify token
+ * ======================
+ */
+const verifyToken = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  // console.log(authHeader);
+  if (!authHeader) {
+    res.status(401).send({ message: "Unauthorized access" });
+  }
+
+  const token = authHeader?.split(" ")[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN, (err, decoded) => {
+    if (err) {
+      return res.status(403).send({ message: "Forbidden access" });
+    }
+    req.decoded = decoded;
+    next();
+  });
+  // console.log(token);
+};
 
 const run = async () => {
   try {
@@ -132,9 +156,16 @@ const run = async () => {
      */
 
     // GET request for bookings
-    app.get("/bookings", async (req, res) => {
-      const query = req.query;
-      const myBookings = await bookingsCollection.find(query).toArray();
+    app.get("/bookings", verifyToken, async (req, res) => {
+      const email = req.query.email;
+      const decodedEmail = req.decoded.email;
+      if (email !== decodedEmail) {
+        return res.status(403).send({ message: "Unauthorized access" });
+      }
+
+      const myBookings = await bookingsCollection
+        .find({ email: email })
+        .toArray();
       res.send(myBookings);
     });
 
@@ -177,6 +208,25 @@ const run = async () => {
       const userInfo = req.body;
       const result = await usersCollection.insertOne(userInfo);
       res.send(result);
+    });
+
+    /**
+     *
+     * JWT = JSON web token
+     * ========================
+     */
+
+    app.get("/jwt", async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      if (user) {
+        const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN, {
+          expiresIn: "1h",
+        });
+        return res.send({ accessToken: token });
+      }
+      res.status(403).send({ accessToken: null });
     });
 
     /**
