@@ -204,6 +204,13 @@ const run = async () => {
      * ===========================================================
      */
 
+    // get users
+    app.get("/users", async (req, res) => {
+      const query = {};
+      const result = await usersCollection.find(query).toArray();
+      res.send(result);
+    });
+
     app.post("/users", async (req, res) => {
       const userInfo = req.body;
       const result = await usersCollection.insertOne(userInfo);
