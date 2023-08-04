@@ -67,6 +67,24 @@ const run = async () => {
       .collection("bookings");
     const usersCollection = client.db("doctorsAppointment").collection("users");
 
+    /**
+     * Veryfy Admin
+     * =========================
+     */
+    const verifyAdmin = async (req, res, next) => {
+      const email = req.query.email;
+      const filter = { email };
+      const user = await usersCollection.findOne(filter);
+
+      if (user?.role !== "admin") {
+        res.status(401).send({ message: "4Ø1 Unauthorized" });
+      }
+
+      if (user?.role === "admin") {
+        next();
+      }
+    };
+
     // get app the appointmentOptions
     app.get("/appointmentOptions", async (req, res) => {
       const date = req.query.date;
@@ -204,8 +222,8 @@ const run = async () => {
      * ===========================================================
      */
 
-    // get users
-    app.get("/users", async (req, res) => {
+    // get all users
+    app.get("/users", verifyAdmin, async (req, res) => {
       const query = {};
       const result = await usersCollection.find(query).toArray();
       res.send(result);
