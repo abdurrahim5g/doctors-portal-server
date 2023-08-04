@@ -221,6 +221,7 @@ const run = async () => {
      * Handle Admin API
      * =============================
      * app.patch("/make-admin")       => Make admin
+     * app.get("/user/admin/:email")  => check user isAdmin
      */
 
     // make admin with API
@@ -241,6 +242,13 @@ const run = async () => {
         upsert: true,
       });
       res.send(result);
+    });
+
+    app.get("/users/admin/:email", async (req, res) => {
+      const email = req.params.email;
+      const filter = { email };
+      const user = await usersCollection.findOne(filter);
+      res.send({ isAdmin: user?.role === "admin" }); // return true; if user is admin
     });
 
     /**
