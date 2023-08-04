@@ -118,6 +118,7 @@ const run = async () => {
     // Use MongoDB Aggrigate
     app.get("/v2/appointmentOptions", async (req, res) => {
       const date = req.query.date;
+      // console.log(date);
       const options = await appointmentCollections
         .aggregate([
           {
@@ -129,7 +130,7 @@ const run = async () => {
                 {
                   $match: {
                     $expr: {
-                      $eq: ["$appointmentData", date],
+                      $eq: ["$appointmentDate", date],
                     },
                   },
                 },
