@@ -224,7 +224,15 @@ const run = async () => {
      */
 
     // make admin with API
-    app.patch("/make-admin", async (req, res) => {
+    app.patch("/make-admin", verifyToken, async (req, res) => {
+      const decodedEmail = req.decoded.email;
+      const userFilter = { email: decodedEmail };
+      const user = await usersCollection.findOne(userFilter);
+
+      if (user?.role !== "admin") {
+        return res.status(401).send({ message: "Admin can only make admin!" });
+      }
+
       const id = req.query.id;
       const query = { _id: new ObjectId(id) };
       const updateDoc = { $set: { role: "admin" } };
