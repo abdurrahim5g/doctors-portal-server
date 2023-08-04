@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const cors = require("cors");
 require("dotenv").config();
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.undypbz.mongodb.net/?retryWrites=true&w=majority`;
 // console.log(uri);
 
@@ -214,6 +214,24 @@ const run = async () => {
     app.post("/users", async (req, res) => {
       const userInfo = req.body;
       const result = await usersCollection.insertOne(userInfo);
+      res.send(result);
+    });
+
+    /**
+     * Handle Admin API
+     * =============================
+     * app.patch("/make-admin")       => Make admin
+     */
+
+    // make admin with API
+    app.patch("/make-admin", async (req, res) => {
+      const id = req.query.id;
+      const query = { _id: new ObjectId(id) };
+      const updateDoc = { $set: { role: "admin" } };
+
+      const result = await usersCollection.updateOne(query, updateDoc, {
+        upsert: true,
+      });
       res.send(result);
     });
 
