@@ -94,7 +94,7 @@ const run = async () => {
         .find(query)
         .toArray();
 
-      const bookingQuery = { appointmentData: date };
+      const bookingQuery = { appointmentDate: date };
       const alreadyBooked = await bookingsCollection
         .find(bookingQuery)
         .toArray();
@@ -196,7 +196,7 @@ const run = async () => {
 
       const alreadyBooked = await bookingsCollection
         .find({
-          appointmentData: bookingInfo.appointmentData,
+          appointmentDate: bookingInfo.appointmentDate,
           tritmentName: bookingInfo.tritmentName,
           email: bookingInfo.email,
         })
@@ -205,7 +205,7 @@ const run = async () => {
       if (alreadyBooked.length > 0) {
         return res.send({
           acknowledged: false,
-          message: `Already booked an appoinement on ${bookingInfo.appointmentData}`,
+          message: `Already booked an appoinement on ${bookingInfo.appointmentDate}`,
         });
       }
 
