@@ -166,6 +166,22 @@ const run = async () => {
     });
 
     /**
+     * Get speciality
+     * =====================
+     * app.get("/speciality")         => Get doctors speciality
+     *
+     */
+    app.get("/speciality", verifyAdmin, async (req, res) => {
+      const filter = {};
+      const result = await appointmentCollections
+        .find(filter)
+        .project({ name: 1 }) // [ .project({name: 1}) ] => IN the same line project should be write without $sign
+        .toArray();
+      console.log(result);
+      res.send(result);
+    });
+
+    /**
      * API naming convension
      * get("/bookings")       => all bookings
      * get("/bookings/:id")   => single booking
