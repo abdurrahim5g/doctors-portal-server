@@ -58,6 +58,7 @@ const run = async () => {
      * => appointmentCollection
      * => bookingsCollection
      * => usersCollection
+     * => doctorsCollection
      */
     const appointmentCollections = client
       .db("doctorsAppointment")
@@ -66,20 +67,21 @@ const run = async () => {
       .db("doctorsAppointment")
       .collection("bookings");
     const usersCollection = client.db("doctorsAppointment").collection("users");
+    const doctorsCollection = client
+      .db("doctorsAppointment")
+      .collection("doctors");
 
     /**
      * Veryfy Admin
      * =========================
      */
     const verifyAdmin = async (req, res, next) => {
-      const email = req.query.email;
-      const filter = { email };
+      const decodedEmail = req.decoded.email;
+      const filter = { email: decodedEmail };
       const user = await usersCollection.findOne(filter);
-
       if (user?.role !== "admin") {
         res.status(401).send({ message: "4Ø1 Unauthorized" });
       }
-
       if (user?.role === "admin") {
         next();
       }
@@ -171,13 +173,13 @@ const run = async () => {
      * app.get("/speciality")         => Get doctors speciality
      *
      */
-    app.get("/speciality", verifyAdmin, async (req, res) => {
+    app.get("/speciality", verifyToken, verifyAdmin, async (req, res) => {
       const filter = {};
       const result = await appointmentCollections
         .find(filter)
         .project({ name: 1 }) // [ .project({name: 1}) ] => IN the same line project should be write without $sign
         .toArray();
-      console.log(result);
+      // console.log(result);
       res.send(result);
     });
 
@@ -208,7 +210,7 @@ const run = async () => {
     app.post("/bookings", async (req, res) => {
       const bookingInfo = req.body;
 
-      console.log(bookingInfo);
+      // console.log(bookingInfo);
 
       const alreadyBooked = await bookingsCollection
         .find({
@@ -240,7 +242,7 @@ const run = async () => {
      */
 
     // get all users
-    app.get("/users", verifyAdmin, async (req, res) => {
+    app.get("/users", verifyToken, verifyAdmin, async (req, res) => {
       const query = {};
       const result = await usersCollection.find(query).toArray();
       res.send(result);
@@ -303,6 +305,27 @@ const run = async () => {
         return res.send({ accessToken: token });
       }
       res.status(403).send({ accessToken: null });
+    });
+
+    /**
+     * doctors API
+     * ====================
+     * => app.get("/doctors")
+     * => app.post("/doctors")
+     *
+     */
+
+    app.get("/doctors", async (req, res) => {
+      const filter = {};
+      const doctors = await doctorsCollection.find(filter).toArray();
+      res.send(doctors);
+    });
+
+    app.post("/doctors", verifyToken, async (req, res) => {
+      const doctorInfo = req.body;
+      console.log(doctorInfo);
+      const result = await doctorsCollection.insertOne(doctorInfo);
+      res.send(result);
     });
 
     /**
