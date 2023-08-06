@@ -321,7 +321,7 @@ const run = async () => {
       res.send(doctors);
     });
 
-    app.post("/doctors", verifyToken, async (req, res) => {
+    app.post("/doctors", verifyToken, verifyAdmin, async (req, res) => {
       const doctorInfo = req.body;
       console.log(doctorInfo);
       const result = await doctorsCollection.insertOne(doctorInfo);
