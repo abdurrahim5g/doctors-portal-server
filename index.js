@@ -315,7 +315,7 @@ const run = async () => {
      *
      */
 
-    app.get("/doctors", async (req, res) => {
+    app.get("/doctors", verifyToken, verifyAdmin, async (req, res) => {
       const filter = {};
       const doctors = await doctorsCollection.find(filter).toArray();
       res.send(doctors);
