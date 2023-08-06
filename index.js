@@ -328,6 +328,13 @@ const run = async () => {
       res.send(result);
     });
 
+    app.delete("/doctors/:id", verifyToken, verifyAdmin, async (req, res) => {
+      const id = req.params;
+      const filter = { _id: new ObjectId(id) };
+      const result = await doctorsCollection.deleteOne(filter);
+      res.send({ status: 200, result });
+    });
+
     /**
      * Try end here
      * ===================== */
