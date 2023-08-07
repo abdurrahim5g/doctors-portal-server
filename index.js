@@ -336,6 +336,29 @@ const run = async () => {
     });
 
     /**
+     * Temprory API
+     * ===================
+     */
+    // app.get("/update-price", async (req, res) => {
+    //   const filter = {};
+    //   const updateDoc = {
+    //     $set: {
+    //       price: 99,
+    //     },
+    //   };
+    //   const option = {
+    //     upsert: true,
+    //   };
+
+    //   const result = await appointmentCollections.updateMany(
+    //     filter,
+    //     updateDoc,
+    //     option
+    //   );
+    //   res.send(result);
+    // });
+
+    /**
      * Try end here
      * ===================== */
   } finally {
