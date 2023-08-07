@@ -208,6 +208,14 @@ const run = async () => {
       res.send(myBookings);
     });
 
+    // GET Single bookings
+    app.get("/bookings/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const result = await bookingsCollection.findOne(filter);
+      res.send(result);
+    });
+
     // Post request for bookings
     app.post("/bookings", async (req, res) => {
       const bookingInfo = req.body;
