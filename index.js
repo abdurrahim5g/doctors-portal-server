@@ -144,6 +144,7 @@ const run = async () => {
             $project: {
               name: 1,
               slots: 1,
+              price: 1,
               booked: {
                 $map: {
                   input: "$booked",
@@ -156,6 +157,7 @@ const run = async () => {
           {
             $project: {
               name: 1,
+              price: 1,
               slots: {
                 $setDifference: ["$slots", "$booked"],
               },
