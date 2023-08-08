@@ -72,6 +72,9 @@ const run = async () => {
     const doctorsCollection = client
       .db("doctorsAppointment")
       .collection("doctors");
+    const paymentsCollection = client
+      .db("doctorsAppointment")
+      .collection("payments");
 
     /**
      * Veryfy Admin
@@ -260,6 +263,21 @@ const run = async () => {
       res.send({
         clientSecret: paymentIntent.client_secret,
       });
+    });
+
+    app.post("/payments", async (req, res) => {
+      const paymentInfo = req.body;
+      const result = await paymentsCollection.insertOne(paymentInfo);
+
+      // Update the booking paid information
+      const filter = { _id: new ObjectId(paymentInfo.bookingId) };
+      await bookingsCollection.updateOne(
+        filter,
+        { $set: { paid: true } },
+        { upsert: true }
+      );
+
+      res.send(result);
     });
 
     /**
