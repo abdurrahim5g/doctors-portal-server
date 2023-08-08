@@ -4,6 +4,8 @@ const port = process.env.PORT || 5000;
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
 require("dotenv").config();
+// Stripe for payment
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.undypbz.mongodb.net/?retryWrites=true&w=majority`;
@@ -239,6 +241,25 @@ const run = async () => {
 
       const result = await bookingsCollection.insertOne(bookingInfo);
       res.send(result);
+    });
+
+    /**
+     *
+     * Stripe Payment APIs
+     */
+    app.post("/create-payment-intent", async (req, res) => {
+      const price = req.body;
+      const amount = price.price * 100;
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount,
+        currency: "usd",
+        // paymentMethodTypes: ["card"],
+      });
+
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
     });
 
     /**
